@@ -32,7 +32,7 @@ def parse_m3u(content):
         if line.startswith("#EXTINF:"):
             current_channel = {}
             group_match = re.search(r'group-title="([^"]+)"', line)
-            current_channel['group'] = group_match.group(1) if group_match else "Genel"
+            current_channel['group']  = group_match.group(1) if group_match else "Genel"
             
             name_parts = line.split(",")
             current_channel['name'] = name_parts[-1].strip() if len(name_parts) > 1 else "Bilinmeyen Kanal"
@@ -67,16 +67,19 @@ else:
     url_input = st.sidebar.text_input("M3U URL Adresi:", placeholder="http://...")
     if url_input:
         try:
-            # CORS engeli yaşamamak için proxy kullanan bağlantı
-            proxy_url = "https://api.allorigins.win/raw?url=" + requests.utils.quote(url_input)
-            res = requests.get(proxy_url, timeout=10)
+            # Tarayıcı gibi görünmek için Headers ekledik (Zaman aşımı ve engellemeleri önler)
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            
+            with st.spinner('M3U listesi indiriliyor...'):
+                res = requests.get(url_input, headers=headers, timeout=15)
+                
             if res.status_code == 200:
                 m3u_text = res.text
                 st.sidebar.success("Liste başarıyla yüklendi!")
             else:
-                st.sidebar.error("Bağlantı başarısız.")
+                st.sidebar.error(f"Bağlantı başarısız (Kod: {res.status_code})")
         except Exception as e:
-            st.sidebar.error(f"Hata: {e}")
+            st.sidebar.error(f"Zaman aşımı veya bağlantı hatası: {e}")
 
 channels = parse_m3u(m3u_text) if m3u_text else []
 
