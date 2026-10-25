@@ -93,7 +93,7 @@ if m3u_text:
     channels = parse_m3u(m3u_text)
 
 if channels:
-    st.sidebar.hr()
+    st.sidebar.markdown("---")
     st.sidebar.subheader("🔍 Filtreleme")
     
     # Kategori Filtresi
